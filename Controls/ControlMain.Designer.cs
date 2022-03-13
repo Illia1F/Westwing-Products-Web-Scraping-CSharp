@@ -39,6 +39,8 @@
             this.tbDestinationFolderPath = new System.Windows.Forms.TextBox();
             this.rtbTxtFileContent = new System.Windows.Forms.RichTextBox();
             this.rtbLog = new System.Windows.Forms.RichTextBox();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.SuspendLayout();
             // 
             // label1
@@ -93,6 +95,7 @@
             this.btnChooseFolderPath.TabIndex = 4;
             this.btnChooseFolderPath.Text = "Choose";
             this.btnChooseFolderPath.UseVisualStyleBackColor = true;
+            this.btnChooseFolderPath.Click += new System.EventHandler(this.btnChooseFolderPath_Click);
             // 
             // btnChooseSourceTxtFilePath
             // 
@@ -105,6 +108,7 @@
             this.btnChooseSourceTxtFilePath.TabIndex = 5;
             this.btnChooseSourceTxtFilePath.Text = "Choose";
             this.btnChooseSourceTxtFilePath.UseVisualStyleBackColor = true;
+            this.btnChooseSourceTxtFilePath.Click += new System.EventHandler(this.btnChooseSourceTxtFilePath_Click);
             // 
             // btnLoadContent
             // 
@@ -117,6 +121,7 @@
             this.btnLoadContent.TabIndex = 6;
             this.btnLoadContent.Text = "Load";
             this.btnLoadContent.UseVisualStyleBackColor = true;
+            this.btnLoadContent.Click += new System.EventHandler(this.btnLoadContent_Click);
             // 
             // tbSourceTxtFilePath
             // 
@@ -125,6 +130,7 @@
             this.tbSourceTxtFilePath.Location = new System.Drawing.Point(3, 24);
             this.tbSourceTxtFilePath.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tbSourceTxtFilePath.Name = "tbSourceTxtFilePath";
+            this.tbSourceTxtFilePath.ReadOnly = true;
             this.tbSourceTxtFilePath.Size = new System.Drawing.Size(607, 22);
             this.tbSourceTxtFilePath.TabIndex = 7;
             // 
@@ -135,6 +141,7 @@
             this.tbDestinationFolderPath.Location = new System.Drawing.Point(3, 69);
             this.tbDestinationFolderPath.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tbDestinationFolderPath.Name = "tbDestinationFolderPath";
+            this.tbDestinationFolderPath.ReadOnly = true;
             this.tbDestinationFolderPath.Size = new System.Drawing.Size(677, 22);
             this.tbDestinationFolderPath.TabIndex = 8;
             // 
@@ -161,6 +168,10 @@
             this.rtbLog.Size = new System.Drawing.Size(747, 152);
             this.rtbLog.TabIndex = 10;
             this.rtbLog.Text = "";
+            // 
+            // openFileDialog
+            // 
+            this.openFileDialog.FileName = "openFileDialog";
             // 
             // ControlMain
             // 
@@ -199,5 +210,7 @@
         private TextBox tbDestinationFolderPath;
         private RichTextBox rtbTxtFileContent;
         private RichTextBox rtbLog;
+        private OpenFileDialog openFileDialog;
+        private FolderBrowserDialog folderBrowserDialog;
     }
 }

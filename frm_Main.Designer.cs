@@ -49,6 +49,7 @@
             this.Controls.Add(this.controlMain1);
             this.MinimumSize = new System.Drawing.Size(749, 404);
             this.Name = "frm_Main";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Westwing Products Web Scraping";
             this.ResumeLayout(false);
 
