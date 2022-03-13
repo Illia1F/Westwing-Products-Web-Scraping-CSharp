@@ -38,19 +38,20 @@
             this.controlMain1.Location = new System.Drawing.Point(0, 0);
             this.controlMain1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.controlMain1.Name = "controlMain1";
-            this.controlMain1.Size = new System.Drawing.Size(733, 547);
+            this.controlMain1.Size = new System.Drawing.Size(733, 461);
             this.controlMain1.TabIndex = 0;
             // 
             // frm_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(733, 547);
+            this.ClientSize = new System.Drawing.Size(733, 461);
             this.Controls.Add(this.controlMain1);
-            this.MinimumSize = new System.Drawing.Size(749, 404);
+            this.MinimumSize = new System.Drawing.Size(749, 500);
             this.Name = "frm_Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Westwing Products Web Scraping";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frm_Main_FormClosing);
             this.ResumeLayout(false);
 
         }
