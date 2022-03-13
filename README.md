@@ -6,8 +6,8 @@
 
 ## General info
 This project is a simple Westwing Product Images Downloader.
-It pulls links out or Westwing product codes from a txt file and downloads its image.
-If link is not Westwing then launch it in browser.
+It pulls urls out or Westwing product codes from a txt file and downloads its image.
+If an url is not Westwing then it will launch a browser.
 
 ## How to use
 * Start a program.
