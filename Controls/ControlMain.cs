@@ -8,71 +8,30 @@ namespace Westwing_Products_Web_Scraping_CSharp.Controls
 {
     public partial class ControlMain : UserControl
     {
-        private const string WestwingStartURL = "https://www.westwingnow.de/all-products/?q=";
-
-        private const string ImageStartURL = "https://static.westwingnow.de/image/upload/e_trim/c_pad,w_930,h_1240,pd_218_74_218_74/simple";
-
-        private const string HtmlClass = "ww-uikit_StyledImage_l0c9i4td-sc-1j9v08g btIwTQ";
-
-        private void btnChooseSourceTxtFilePath_Click(object sender, EventArgs e)
+        private void btnChooseFolderPath_Click(object sender, EventArgs e)
         {
-            openFileDialog.InitialDirectory = "c:\\";
-            openFileDialog.Filter = "txt files (*.txt)|*.txt";
-            openFileDialog.FilterIndex = 2;
-            openFileDialog.RestoreDirectory = true;
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                tbSourceTxtFilePath.Text = openFileDialog.FileName;
-
-                btnLoadContent_Click(sender, e);
-            }
+            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+                tbDestinationFolderPath.Text = folderBrowserDialog.SelectedPath;
         }
 
-        private async void btnLoadContent_Click(object sender, EventArgs e)
+        private async void btnOpenLinks_Click(object sender, EventArgs e)
         {
+            StartLoading();
+
             try
             {
-                if (string.IsNullOrWhiteSpace(tbSourceTxtFilePath.Text))
-                    throw new Exception("Txt File is not defined.");
+                ThrowExceptionIfFileContentNotLoaded();
 
-                openFileDialog.FileName = tbSourceTxtFilePath.Text;
-
-                Stream fileStream = openFileDialog.OpenFile();
-
-                rtbTxtFileContent.Text = await ReadFileStreamAsync(fileStream);
+                IEnumerable<string> urls = await GetUrlsOutOfContentAsync();
+                foreach (var url in urls) OpenBrowser(url);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
             }
-        }
-
-        private async Task<string> ReadFileStreamAsync(Stream fileStream)
-        {
-            var builder = new StringBuilder();
-            using (var reader = new StreamReader(fileStream))
+            finally
             {
-                string? line;
-
-                do
-                {
-                    line = await reader.ReadLineAsync();
-
-                    if (string.IsNullOrWhiteSpace(line) == false)
-                        builder.AppendLine(line.StartsWith("http") ? line : WestwingStartURL + line);
-                }
-                while (line != null);
-            }
-
-            return builder.ToString();
-        }
-
-        private void btnChooseFolderPath_Click(object sender, EventArgs e)
-        {
-            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
-            {
-                tbDestinationFolderPath.Text = folderBrowserDialog.SelectedPath;
+                StopLoading();
             }
         }
 
@@ -82,29 +41,23 @@ namespace Westwing_Products_Web_Scraping_CSharp.Controls
 
             try
             {
-                if (string.IsNullOrWhiteSpace(tbSourceTxtFilePath.Text))
-                {
-                    throw new Exception("Txt File is not defined.");
-                }
-                else if (string.IsNullOrWhiteSpace(tbDestinationFolderPath.Text))
-                {
-                    throw new Exception("Destination Folder is not defined.");
-                }
-                else if (string.IsNullOrWhiteSpace(rtbTxtFileContent.Text))
-                {
-                    throw new Exception("Txt File is not loaded.");
-                }
+                ThrowExceptionIfFolderPathNotDefined();
 
-                IEnumerable<string> urls = rtbTxtFileContent.Text
-                  .Split('\n')
-                  .Where(s => string.IsNullOrWhiteSpace(s) == false);
+                ThrowExceptionIfFileContentNotLoaded();
 
-                int ulrId = 0;
-                foreach(var url in urls)
+                IEnumerable<string> urls = await GetUrlsOutOfContentAsync();
+
+                SetUpProgressBar(urls.Count(), 1);
+
+                for (int i = 0; i < urls.Count(); i++)
                 {
-                    if(url.StartsWith(WestwingStartURL))
+                    progressBar.PerformStep();
+
+                    string url = urls.ElementAt(i);
+
+                    if (url.StartsWith(Constants.WestwingProductStartURL))
                     {
-                        if (await ScrapeAsync(url, ulrId.ToString()))
+                        if (await WestwingScrapingAsync(url, i.ToString()))
                         {
                             Log($"Downloaded from URL: { url } ✅");
                         }
@@ -117,11 +70,7 @@ namespace Westwing_Products_Web_Scraping_CSharp.Controls
                     {
                         OpenBrowser(url);
                     }
-
-                    ulrId++;
                 }
-
-                MessageBox.Show("The process was completed successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
             }
             catch (Exception ex)
             {
@@ -129,11 +78,85 @@ namespace Westwing_Products_Web_Scraping_CSharp.Controls
             }
             finally
             {
+                progressBar.Visible = false;
                 StopLoading();
             }
         }
 
-        private async Task<bool> ScrapeAsync(string url, string name)
+        private void SetUpProgressBar(int max, int step)
+        {
+            progressBar.Minimum = progressBar.Value = 0;
+            progressBar.Maximum = max;
+            progressBar.Step = step;
+            progressBar.Visible = true;
+        }
+
+        private void btnClearEventLog_Click(object sender, EventArgs e)
+        {
+            rtbLog.Text = String.Empty;
+        }
+
+        private void ThrowExceptionIfFolderPathNotDefined()
+        {
+            if (string.IsNullOrWhiteSpace(tbDestinationFolderPath.Text))
+                throw new Exception("Destination Folder is not defined.");
+        }
+
+        private void ThrowExceptionIfFileContentNotLoaded()
+        {
+            if (string.IsNullOrWhiteSpace(rtbTxtFileContent.Text))
+                throw new Exception("Txt File is not loaded.");
+        }
+
+        private async Task<IEnumerable<string>> GetUrlsOutOfContentAsync()
+        {
+            string content = rtbTxtFileContent.Text;
+
+            var urls = new List<string>();
+            var correctContentBuilder = new StringBuilder();
+            var lineBuilder = new StringBuilder();
+
+            bool buildContent(string line)
+            {
+                if (string.IsNullOrWhiteSpace(line) == false)
+                {
+                    string url = line.StartsWith(Constants.HTTP) ? line : Constants.WestwingProductStartURL + line;
+                    correctContentBuilder.AppendLine(url);
+                    urls.Add(url);
+                    return true;
+                }
+
+                return false;
+            }
+
+            for (int i = 0; i < content.Length; i++)
+            {
+                if (content[i].Equals('\n'))
+                {
+                    buildContent(lineBuilder.ToString());
+
+                    lineBuilder.Clear();
+                }
+                else
+                {
+                    lineBuilder.Append(content[i]);
+                }
+
+                await Task.Yield();
+            }
+
+            if(lineBuilder.Length > 0)
+                buildContent(lineBuilder.ToString());
+
+            rtbTxtFileContent.Text = correctContentBuilder.ToString();
+
+            correctContentBuilder.Clear();
+            lineBuilder.Clear();
+
+            return urls;
+        }
+
+        private async Task<bool> WestwingScrapingAsync(string url, string name)
         {
             var document = await new HtmlWeb().LoadFromWebAsync(url);
 
@@ -144,24 +167,22 @@ namespace Westwing_Products_Web_Scraping_CSharp.Controls
                     var src = e.GetAttributeValue("src", null);
                     var htmlClass = e.GetAttributeValue("class", null);
 
-                    return (htmlClass == HtmlClass || htmlClass == null)
+                    return (htmlClass == Constants.WestwingHtmlClass || htmlClass == null)
                         && (String.IsNullOrEmpty(src) == false && src.StartsWith("http"));
                 })
                 ?.GetAttributeValue("src", null);
 
-            if (imgLink == null || imgLink.Any() == false)
-                return false;
+            if (imgLink == null || imgLink.Any() == false) return false;
 
             string[] imgExtentions = imgLink
                 .Replace("/simple", "\n")
                 .Split('\n');
 
-            if (imgLink.Count() < 2)
-                return false;
+            if (imgLink.Count() < 2) return false;
 
             string imgId = imgExtentions.Last();
 
-            await DownloadImageAsync(ImageStartURL + imgExtentions.Last(), $"img_{name}");
+            await DownloadImageAsync(Constants.WestwingImageStartURL + imgExtentions.Last(), $"img_{name}");
 
             return true;
         }
@@ -173,32 +194,6 @@ namespace Westwing_Products_Web_Scraping_CSharp.Controls
             using var image = Image.FromStream(imageStream);
 
             image.Save($"{tbDestinationFolderPath.Text}\\" + filename + ".png", ImageFormat.Png);
-        }
-
-        private void btnOpenLinks_Click(object sender, EventArgs e)
-        {
-            StartLoading();
-
-            try
-            {
-                if (string.IsNullOrWhiteSpace(tbSourceTxtFilePath.Text))
-                    throw new Exception("Txt File is not loaded.");
-
-                IEnumerable<string> urls = rtbTxtFileContent.Text
-                    .Split('\n')
-                    .Where(s => string.IsNullOrWhiteSpace(s) == false);
-
-                foreach(var url in urls) OpenBrowser(url);
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                StopLoading();
-            }
         }
 
         private void OpenBrowser(string url)
@@ -224,10 +219,7 @@ namespace Westwing_Products_Web_Scraping_CSharp.Controls
             rtbTxtFileContent.ReadOnly = true;
             btnChooseFolderPath.Enabled = false;
             btnDownload.Enabled = false;
-            btnChooseSourceTxtFilePath.Enabled = false;
-            btnLoadContent.Enabled = false;
             btnOpenLinks.Enabled = false;
-            //splashScreenManager.ShowWaitForm();
         }
 
         private void StopLoading()
@@ -235,10 +227,7 @@ namespace Westwing_Products_Web_Scraping_CSharp.Controls
             rtbTxtFileContent.ReadOnly = false;
             btnChooseFolderPath.Enabled = true;
             btnDownload.Enabled = true;
-            btnChooseSourceTxtFilePath.Enabled = true;
-            btnLoadContent.Enabled = true;
             btnOpenLinks.Enabled = true;
-            //splashScreenManager.CloseWaitForm();
         }
 
         private void Log(string text)
@@ -249,6 +238,8 @@ namespace Westwing_Products_Web_Scraping_CSharp.Controls
         public ControlMain()
         {
             InitializeComponent();
+
+            progressBar.Visible = false;
         }
     }
 }

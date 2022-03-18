@@ -37,15 +37,16 @@
             this.controlMain1.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.controlMain1.Location = new System.Drawing.Point(0, 0);
             this.controlMain1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.controlMain1.MinimumSize = new System.Drawing.Size(413, 413);
             this.controlMain1.Name = "controlMain1";
-            this.controlMain1.Size = new System.Drawing.Size(733, 461);
+            this.controlMain1.Size = new System.Drawing.Size(751, 512);
             this.controlMain1.TabIndex = 0;
             // 
             // frm_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(733, 461);
+            this.ClientSize = new System.Drawing.Size(751, 512);
             this.Controls.Add(this.controlMain1);
             this.MinimumSize = new System.Drawing.Size(749, 500);
             this.Name = "frm_Main";

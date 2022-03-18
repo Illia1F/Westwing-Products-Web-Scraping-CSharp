@@ -6,13 +6,18 @@
 
 ## General info
 This project is a simple Westwing Product Images Downloader.
-It pulls urls out or Westwing product codes from a txt file and downloads its image.
-If an url is not Westwing then it will launch a browser.
+It takes urls or Westwing product codes and downloads its image.
+
+* Westwing Product Url Example: https://www.westwingnow.de/all-products/?q=DEQ21WES67283-169138
+* Westwing Product Code Example: DEQ21WES67283-169138
+
+If a taken url is not Westwing then it will launch a browser.
 
 ## How to use
 * Start a program.
-* It is necessary to load a sample Txt file with Westwing links and choose a destination folder path.
-* Click the button-Download.
+* Enter Westwing Product Codes or Urls to Main Input Section.
+* Click the button[Download] or button[Open Links].
+* There is Event Log where you can see details.
 
 ## Technologies
 Project is created with:
