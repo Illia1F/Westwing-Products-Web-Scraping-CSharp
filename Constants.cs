@@ -8,6 +8,6 @@
 
         public const string WestwingImageStartURL = "https://static.westwingnow.de/image/upload/e_trim/c_pad,w_930,h_1240,pd_218_74_218_74/simple";
 
-        public const string WestwingHtmlClass = "ww-uikit_StyledImage_l0jjcrta-sc-tdnl5v bcUXUp";
+        public const string WestwingHtmlClass = "ww-uikit_StyledImage_l3lep7xr-sc-hkzcsg iKjXEJ";
     }
 }
